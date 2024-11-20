@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>ex1/index</title>
+</head>
+<body>
+  <h1>ex1/index</h1>
+  <p th:text="${message}">message</p>
+  <ul>
+    <li th:each="str : ${arr}">[[${str}]]</li>
+  </ul>
+  <ul>
+    <li th:text="${arr[0]}">결과값</li>
+    <li th:text="${arr[1]}">결과값</li>
+    <li th:text="${arr[2]}">결과값</li>
+  </ul>
+  <p th:text="${arr[0]}">결과값</p>
+  <p th:with="str1=${arr[0]}, str2=${arr[1]}, str3=${arr[2]}">
+    [[${str1}]], [[${str2}]], [[${str3}]]
+  </p>
+  <button onclick="clickHandler()">클릭</button>
+  <p id="result">결과값</p>
+
+  <hr>
+  <p th:text="${str1}">결과값</p>
+  <p>나이 : [[${age}]]</p>
+  <p th:if="${age > 19}">성인</p>
+  <p th:unless="${age > 19}">미성년자</p>
+  <testtag th:each="item : ${list}">[[${item}]]</testtag>  
+  <ul th:with="testone=1,testtwo=2,testthree=3">
+    <li th:text="${testone}">결과값</li>
+    <li th:text="${testtwo}">결과값</li>
+    <li th:text="${testthree}">결과값</li>
+  </ul>
+  <script th:inline="javascript">
+    function clickHandler() {
+      document.getElementById("result").innerText = "<p th:text=\"${str1}\">결과값</p>";
+    }
+  </script>
+</body>
+</html>

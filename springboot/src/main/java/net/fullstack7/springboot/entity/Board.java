@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "board")
 public class Board extends BoardEntity {
     
     @Id
@@ -24,6 +25,7 @@ public class Board extends BoardEntity {
     @Column(nullable = false)
     private String writer;
     
+
     @Builder
     public Board(String title, String content, String writer) {
         this.title = title;

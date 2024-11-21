@@ -3,52 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <title>게시판</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
 </head>
 <body>
-    <h1>게시판</h1>
-    <a href="/board/write">글쓰기</a>
-    <form th:action="@{/board}" method="get">
-        <select name="searchType">
-            <option value="all" th:selected="${searchDTO.searchType == 'all'}">전체</option>
-            <option value="title" th:selected="${searchDTO.searchType == 'title'}">제목</option>
-            <option value="content" th:selected="${searchDTO.searchType == 'content'}">내용</option>
-            <option value="writer" th:selected="${searchDTO.searchType == 'writer'}">작성자</option>
-        </select>
-        <input type="text" name="keyword" th:value="${searchDTO.keyword}">
-        <button type="submit">검색</button>
-    </form>
-    <table border="1">
-        <thead>
-            <tr>
-                <th>번호</th>
-                <th>제목</th>
-                <th>작성자</th>
-                <th>작성일</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr th:each="board : ${boards}">
-                <td th:text="${board.id}">1</td>
-                <td>
-                    <a th:href="@{/board/{id}(id=${board.id})}" 
-                       th:text="${board.title}">제목</a>
-                </td>
-                <td th:text="${board.writer}">작성자</td>
-                <td th:text="${#temporals.format(board.createdAt, 'yyyy-MM-dd HH:mm')}">
-                    2024-03-14
-                </td>
-            </tr>
-        </tbody>
-    </table>
-    <div th:if="${boards.totalPages > 0}">
-        <a th:if="${currentPage > 1}" 
-           th:href="@{/board(page=${currentPage - 2}, searchType=${searchDTO.searchType}, keyword=${searchDTO.keyword})}">이전</a>
-        <span th:each="pageNum : ${#numbers.sequence(startPage, endPage)}">
-            <a th:href="@{/board(page=${pageNum - 1}, searchType=${searchDTO.searchType}, keyword=${searchDTO.keyword})}"
-               th:text="${pageNum}">1</a>
-        </span>
-        <a th:if="${currentPage < boards.totalPages}" 
-           th:href="@{/board(page=${currentPage}, searchType=${searchDTO.searchType}, keyword=${searchDTO.keyword})}">다음</a>
+    <div class="w-full max-w-7xl mx-auto px-4 py-8">
+        <h1 class="text-2xl font-bold mb-4">게시판</h1>
+        <a href="/board/write" class="mb-4 inline-block px-4 py-2 bg-blue-600 text-white rounded-lg">글쓰기</a>
+        <form th:action="@{/board}" method="get" class="mb-6 flex gap-4 items-center">
+            <select name="searchType" class="px-3 py-2 border rounded-lg">
+                <option value="all" th:selected="${searchDTO.searchType == 'all'}">전체</option>
+                <option value="title" th:selected="${searchDTO.searchType == 'title'}">제목</option>
+                <option value="content" th:selected="${searchDTO.searchType == 'content'}">내용</option>
+                <option value="writer" th:selected="${searchDTO.searchType == 'writer'}">작성자</option>
+            </select>
+            <div class="flex-1 relative">
+                <input type="text" name="keyword" th:value="${searchDTO.keyword}" placeholder="검색어를 입력하세요" class="w-full px-4 py-2 border rounded-lg pr-10" />
+                <span class="absolute right-3 top-2.5 text-gray-400">🔍</span>
+            </div>
+            <select name="sortType" class="px-3 py-2 border rounded-lg">
+                <option value="createdAt" th:selected="${param.sortType == 'createdAt'}">작성일</option>
+                <option value="title" th:selected="${param.sortType == 'title'}">제목</option>
+                <option value="writer" th:selected="${param.sortType == 'writer'}">작성자</option>
+            </select>
+            <select name="sortOrder" class="px-3 py-2 border rounded-lg">
+                <option value="desc" th:selected="${param.sortOrder == 'desc'}">내림차순</option>
+                <option value="asc" th:selected="${param.sortOrder == 'asc'}">오름차순</option>
+            </select>
+            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg">검색</button>
+        </form>
+        <div class="overflow-x-auto">
+            <table class="w-full border-collapse">
+                <thead>
+                    <tr class="bg-gray-50">
+                        <th class="border px-4 py-2 text-left">번호</th>
+                        <th class="border px-4 py-2 text-left">제목</th>
+                        <th class="border px-4 py-2 text-left">작성자</th>
+                        <th class="border px-4 py-2 text-left">작성일</th>
+                    </tr>
+                </thead>
+                <tbody th:if="${boards.totalPages > 0}">
+                    <tr th:each="board : ${boards}" class="hover:bg-gray-50">
+                        <td class="border px-4 py-2" th:text="${board.id}">1</td>
+                        <td class="border px-4 py-2">
+                            <a th:href="@{/board/{id}(id=${board.id})}" th:text="${board.title}">제목</a>
+                        </td>
+                        <td class="border px-4 py-2" th:text="${board.writer}">작성자</td>
+                        <td class="border px-4 py-2" th:text="${#temporals.format(board.createdAt, 'yyyy-MM-dd HH:mm')}">2024-03-14</td>
+                    </tr>
+                </tbody>
+                <tbody th:unless="${boards.totalPages > 0}">
+                    <tr>
+                        <td colspan="4" class="border px-4 py-2 text-center">게시글이 없습니다.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div th:if="${boards.totalPages > 0}" class="mt-6 flex justify-center gap-2">
+            <a th:if="${currentPage > 1}" th:href="@{/board(page=0, searchType=${searchDTO.searchType}, keyword=${searchDTO.keyword}, sortType=${param.sortType}, sortOrder=${param.sortOrder})}" 
+               class="px-3 py-1 border rounded hover:bg-gray-50">처음</a>
+            
+            <a th:if="${currentPage > 1}" th:href="@{/board(page=${currentPage - 2}, searchType=${searchDTO.searchType}, keyword=${searchDTO.keyword}, sortType=${param.sortType}, sortOrder=${param.sortOrder})}" 
+               class="px-3 py-1 border rounded hover:bg-gray-50">이전</a>
+            
+            <span th:each="pageNum : ${#numbers.sequence(startPage, endPage)}">
+                <a th:href="@{/board(page=${pageNum - 1}, searchType=${searchDTO.searchType}, keyword=${searchDTO.keyword}, sortType=${param.sortType}, sortOrder=${param.sortOrder})}" 
+                   th:text="${pageNum}" 
+                   th:class="${pageNum == currentPage} ? 'px-3 py-1 border rounded bg-blue-600 text-white' : 'px-3 py-1 border rounded hover:bg-gray-50'"></a>
+            </span>
+            
+            <a th:if="${currentPage < boards.totalPages}" th:href="@{/board(page=${currentPage}, searchType=${searchDTO.searchType}, keyword=${searchDTO.keyword}, sortType=${param.sortType}, sortOrder=${param.sortOrder})}" 
+               class="px-3 py-1 border rounded hover:bg-gray-50">다음</a>
+            
+            <a th:if="${currentPage < boards.totalPages}" th:href="@{/board(page=${boards.totalPages - 1}, searchType=${searchDTO.searchType}, keyword=${searchDTO.keyword}, sortType=${param.sortType}, sortOrder=${param.sortOrder})}" 
+               class="px-3 py-1 border rounded hover:bg-gray-50">마지막</a>
+        </div>
+        <div th:unless="${boards.totalPages > 0}" class="mt-6 flex justify-center">
+            <a th:href="@{/board}" class="px-3 py-1 border rounded hover:bg-gray-50">이전</a>
+            <span><a th:href="@{/board}" class="px-3 py-1 border rounded hover:bg-gray-50">1</a></span>
+            <a th:href="@{/board?page=2}" class="px-3 py-1 border rounded hover:bg-gray-50">다음</a>
+        </div>
     </div>
+    <div class="mt-4 flex items-center justify-center">
+        <input type="number" id="pageInput" min="1" class="border rounded-lg px-3 py-2 mr-2" placeholder="페이지 번호" />
+        <button onclick="goToPage()" class="bg-blue-600 text-white rounded-lg px-4 py-2 hover:bg-blue-700">이동</button>
+    </div>
+    <script>
+        const searchType = '[[${searchDTO.searchType}]]';
+        const keyword = '[[${searchDTO.keyword}]]';
+        const sortType = '[[${param.sortType}]]';
+        const sortOrder = '[[${param.sortOrder}]]';
+        function goToPage() {
+            let page = document.querySelector('#pageInput').value;
+            console.log(page);
+            location.href = "/board?page=" + (page-1) + "&searchType=" + searchType + "&keyword=" + keyword;
+        }
+    </script>
 </body>
 </html>

@@ -19,7 +19,6 @@ public class BoardService {
     
     private final BoardRepository boardRepository;
     
-    // 게시글 생성
     public Long create(BoardDTO dto) {
         Board board = Board.builder()
                 .title(dto.getTitle())
@@ -29,14 +28,13 @@ public class BoardService {
         return boardRepository.save(board).getId();
     }
     
-    // 게시글 상세 조회
     public BoardDTO findById(Long id) {
         Board board = boardRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
+
         return convertToDTO(board);
     }
     
-    // 게시글 수정
     public void update(Long id, BoardDTO dto) {
         Board board = boardRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
@@ -44,12 +42,10 @@ public class BoardService {
         boardRepository.save(board);
     }
     
-    // 게시글 삭제
     public void delete(Long id) {
         boardRepository.deleteById(id);
     }
     
-    // Entity를 DTO로 변환
     private BoardDTO convertToDTO(Board board) {
         return BoardDTO.builder()
                 .id(board.getId())
@@ -66,6 +62,16 @@ public class BoardService {
             searchDTO.getSearchType(),
             searchDTO.getKeyword(),
             pageable
-        ).map(this::convertToDTO);
+        ).map(board -> convertToDTO(board));
+    }
+    
+    public Page<BoardDTO> searchAndSort(SearchDTO searchDTO, Pageable pageable, String sortType, String sortOrder) {
+        return boardRepository.searchAndSort(
+            searchDTO.getSearchType(),
+            searchDTO.getKeyword(),
+            pageable,
+            sortType,
+            sortOrder
+        ).map(board -> convertToDTO(board));
     }
 }

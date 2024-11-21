@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -28,10 +29,13 @@ public class BoardController {
     
     // 게시글 목록 페이지
     @GetMapping
-    public String list(@ModelAttribute SearchDTO searchDTO, Model model,
-                  @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) 
-                  Pageable pageable) {
-        Page<BoardDTO> boardPage = boardService.search(searchDTO, pageable);
+    public String list(@ModelAttribute SearchDTO searchDTO, 
+                      @RequestParam(defaultValue = "createdAt") String sortType,
+                      @RequestParam(defaultValue = "desc") String sortOrder,
+                      Model model,
+                      @PageableDefault(size = 10) Pageable pageable) {
+        
+        Page<BoardDTO> boardPage = boardService.searchAndSort(searchDTO, pageable, sortType, sortOrder);
         
         // 페이지 그룹 계산
         int currentPage = boardPage.getNumber() + 1;
@@ -48,13 +52,11 @@ public class BoardController {
         return "board/list";
     }
     
-    // 게시글 작성 페이지
     @GetMapping("/write")
     public String writeForm() {
         return "board/write";
     }
     
-    // 게시글 작성 처리
     @PostMapping("/write")
     public String write(BoardDTO dto) {
         log.info("dto: {}", dto);
@@ -62,31 +64,28 @@ public class BoardController {
         return "redirect:/board";
     }
     
-    // 게시글 상세 페이지
     @GetMapping("/{id}")
     public String detail(@PathVariable Long id, Model model) {
         model.addAttribute("board", boardService.findById(id));
         return "board/detail";
     }
     
-    // 게시글 수정 페이지
     @GetMapping("/{id}/edit")
     public String editForm(@PathVariable Long id, Model model) {
         model.addAttribute("board", boardService.findById(id));
         return "board/edit";
     }
     
-    // 게시글 수정 처리
     @PostMapping("/{id}/edit")
     public String edit(@PathVariable Long id, BoardDTO dto) {
         boardService.update(id, dto);
         return "redirect:/board/" + id;
     }
     
-    // 게시글 삭제
     @PostMapping("/{id}/delete")
     public String delete(@PathVariable Long id) {
         boardService.delete(id);
         return "redirect:/board";
     }
+
 }
